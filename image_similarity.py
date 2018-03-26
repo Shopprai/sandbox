@@ -1,4 +1,5 @@
 import os
+import sys
 
 # clarifai: an image analysis api
 from clarifai.rest import ClarifaiApp
@@ -8,7 +9,7 @@ from clarifai.rest import Image as ClImage
 import requests
 
 # lxml: a library to parse html documents
-from lxml import html
+from lxml import html, etree
 
 # API KEY: dbe3f2920953470199637703b6566c31
 # TODO: figure out how to download all images
@@ -19,10 +20,15 @@ app = ClarifaiApp(api_key='dbe3f2920953470199637703b6566c31')
 
 # app.inputs.bulk_create_images([img1, img2])
 
-def upload_images(image_urls):
+def upload_images(image_urls, batch_size=30):
 	image_list = []
+	image_counter = 0
 	for image_url in image_urls:
 		image_list.append(ClImage(url = image_url))
+		image_counter += 1
+		if image_counter % batch_size == 0:
+			app.inputs.bulk_create_images(image_list)
+			image_list = []
 	app.inputs.bulk_create_images(image_list)
 	print("upload_images: complete")
 
@@ -38,22 +44,29 @@ def search_by_url(url):
 	search = app.inputs.search_by_image(url=url)
 	search_results = []
 	for search_result in search:
+		print(vars(search_result), file=sys.stdout)
 		search_results.append({"score": search_result.score, "url": search_result.url})
 	return search_results
 
 # //*[@id="product-9189983"]/a/div[1]/img
 
+# TODO: this method does not sucessfully get all images. Selenium may be needed to get post-render images.
 def get_image_urls(url, request_type="GET"):
 	if request_type == "GET":
 		src_file = open("download.html", "wb")
 		page = requests.get(url)
 		tree = html.fromstring(page.content)
-		image_urls = tree.xpath('//*[@class="_2oHs74P"]/a/div[1]/img/@src')
+		# image_urls = tree.xpath('//*[@class="_2oHs74P"]/a/div[1]/img/@src')
+		image_urls = tree.xpath('//*[@class="_1FN5N-P"]/img/@src')
+		# divs = tree.xpath('//*[@class="_1FN5N-P"]')
+		# print(len(divs))
+		# for div in divs:
+		# 	print(etree.tostring(div, pretty_print=True))
 		print("get_image_urls: complete")
 		return image_urls
 
-#image_urls = get_image_urls("http://www.asos.com/women/ctas/fashion-trends-styling-3/cat/?cid=16264&ctaref=shop%7Coccasionwearww%7Cww_hp_2&page=1")
-#upload_images(image_urls)
+# image_urls = get_image_urls("http://www.asos.com/women/ctas/fashion-trends-styling-3/cat/?cid=16264&ctaref=shop%7Coccasionwearww%7Cww_hp_2&page=1")
+# upload_images(image_urls)
 # search_by_url("http://www.margarets.com/images/specialtylogos-photos/CoachPurseClean.jpg")
 # image = app.inputs.get("puppy1")
 # print(image)
