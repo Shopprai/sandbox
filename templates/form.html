@@ -1,0 +1,9 @@
+<form method="POST">
+    <input name="text">
+    <input type="submit">
+    {% if results %}
+    {% for result in results %}
+    <div><img src={{result.url}}> {{result.score}}</div>
+    {% endfor %}
+    {% endif %}
+</form>
