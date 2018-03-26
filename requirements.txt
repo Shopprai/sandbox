@@ -1,3 +1,5 @@
-Flask
+flask
 gunicorn
 clarifai
+lxml
+requests
