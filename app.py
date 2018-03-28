@@ -11,9 +11,18 @@ def index():
 
 @app.route('/', methods=['POST'])
 def my_form_post():
-	text = request.form['text']
-	search_results = imgsim.search_by_url(text)
-	return render_template("form.html", results=search_results)
+	key_list = list(request.form.keys())
+	print(key_list)
+	if "reset" in key_list: # oh boy this is gross
+		print("resetting")
+		imgsim.initialize()
+		return render_template("form.html")
+	else:
+		text = request.form['text']
+		search_results = imgsim.search_by_url(text)
+		return render_template("form.html", results=search_results)
+	
 
 if __name__ == '__main__':
-    app.run(debug=True, use_reloader=True)
+	# initialize_db()
+	app.run(debug=True, use_reloader=True)
