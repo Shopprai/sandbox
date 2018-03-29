@@ -1,11 +1,9 @@
 from pymodm import fields, MongoModel, connect
 import os
 
-MONGO_URL = os.environ.get('MONGO_URL')
-if not MONGO_URL:
-    MONGO_URL = "mongodb://localhost:27017/shopprai";
+MONGO_URL = os.getenv('MONGOLAB_URI', 'mongodb://localhost:27017/shopprai')
 
-connect("mongodb://localhost:27017/shopprai", alias="main")
+connect(MONGO_URL, alias="main")
 
 class Product(MongoModel):
 	image_url = fields.URLField()
