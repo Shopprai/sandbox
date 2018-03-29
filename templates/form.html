@@ -1,10 +1,12 @@
 <form method="POST">
 	<button type="submit" name="reset">Initialize</button>
-    <input name="text">
+    <input name="input_url" placeholder="Image URL" required>
+    <input type="number" min="0" step="0.01" name="price_low" placeholder="price low" required>
+    <input type="number" min="0" step="0.01" name="price_high" placeholder="price high" required>
     <input type="submit" name="search">
     {% if results %}
     {% for result in results %}
-    <div><img src={{result.url}}> {{result.score}}</div>
+    <div><img src={{result.url}}>price: {{result.price}}, similarity: {{result.score}}</div>
     {% endfor %}
     {% endif %}
 </form>
