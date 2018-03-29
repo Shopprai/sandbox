@@ -37,6 +37,7 @@ def my_form_post():
 		webpage_display_results = []
 		for product in Product.objects.raw({'image_url': {'$in': image_urls}, 'price':{'$gte':price_low, '$lte':price_high}}): # TODO: just get price field? why is the pymodm documentation so bad :(
 			webpage_display_results.append({'url':product.image_url, 'price': product.price, 'score':score_map[product.image_url]})
+		webpage_display_results = sorted(webpage_display_results, key=lambda k: k['score'], reverse=True)
 		print(webpage_display_results)
 		return render_template('form.html', results=webpage_display_results)
 
