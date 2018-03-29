@@ -2,6 +2,7 @@ from pymodm import fields, MongoModel, connect
 import os
 
 MONGO_URL = os.getenv('MONGOLAB_URI', 'mongodb://localhost:27017/shopprai')
+print(MONGO_URL)
 
 connect(MONGO_URL, alias="main")
 
