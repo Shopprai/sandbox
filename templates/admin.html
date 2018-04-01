@@ -1,0 +1,11 @@
+<div> requests from users: </div>
+{% if requests %}
+<form method="POST">
+{% for request in requests %}
+<input type="checkbox" name="request" value="{{request.email_src_concat}}"> {{request.email}} -> <a href={{request.src_url}}>Image URL</a>, <a href={{request.page_url}}>Page URL</a>, <a href={{request.link_url}}>Link URL</a>  <br>
+{% endfor %}
+<input type="submit">
+</form>
+{% else %}
+<div>no requests right now</div>
+{% endif %}

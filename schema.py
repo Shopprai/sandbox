@@ -11,6 +11,15 @@ class Product(MongoModel):
 	price = fields.FloatField()
 	title = fields.CharField()
 	store = fields.CharField()
+	class Meta:
+		connection_alias = "main"
 
+
+class Request(MongoModel):
+	email = fields.EmailField()
+	src_url = fields.URLField()
+	link_url = fields.URLField()
+	page_url = fields.URLField()
+	email_src_concat = fields.CharField(primary_key=True) # unique ID is combined email + img src
 	class Meta:
 		connection_alias = "main"

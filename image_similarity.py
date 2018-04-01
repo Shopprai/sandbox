@@ -15,12 +15,11 @@ from lxml import html, etree
 from schema import *
 
 # API KEY: dbe3f2920953470199637703b6566c31
-# TODO: figure out how to download all images
 
 app = ClarifaiApp(api_key='dbe3f2920953470199637703b6566c31') # TODO: hide this key in an environment variable.
 
 def clarifai_clear_images():
-	app.inputs.delete_all()
+	app.inputs.delete_all() # TODO: this might be asynchronous :/ 
 
 def clarifai_upload_images(image_urls, batch_size=30): # uploads images in batches. why? because the tutorial said so.
 	image_list = []
