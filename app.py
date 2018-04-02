@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 from flask_cors import CORS, cross_origin
 
 import image_similarity as imgsim
@@ -40,6 +40,15 @@ def initialize_db():
 def accept_request():
 	Request(email=request.form['email'], src_url=request.form['src_url'], link_url=request.form['link_url'], page_url=request.form['page_url'], email_src_concat=request.form['email']+request.form['src_url']).save()
 	return '', 204 # everything is ok
+
+@app.route('/request/<email>')
+@cross_origin()
+def get_pending_requests(email):
+	print("received request for " + email)
+	request_response = {'requests': []};
+	for request in Request.objects.raw({'email': email}):
+		request_response['requests'].append({'src_url': request.src_url, 'page_url': request.page_url, 'link_url': request.link_url})
+	return jsonify(request_response)
 
 @app.route('/admin')
 def admin_requests_view():
