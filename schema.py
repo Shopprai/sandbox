@@ -17,7 +17,7 @@ class Product(MongoModel):
 
 class Request(MongoModel):
 	email = fields.EmailField()
-	src_url = fields.URLField()
+	src_url = fields.CharField() # handles base64 encodings
 	link_url = fields.URLField()
 	page_url = fields.URLField()
 	email_src_concat = fields.CharField(primary_key=True) # unique ID is combined email + img src
