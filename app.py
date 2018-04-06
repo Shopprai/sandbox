@@ -5,7 +5,14 @@ import image_similarity as imgsim
 
 from schema import *
 
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
 app = Flask(__name__)
+
+def initialize_env():
+	cloudinary.config(cloud_name='shoppr-ai', api_key='279332761512822', api_secret='0_npp-j486AZrG2HfeRoU4ZwnZg') # TODO: conceal keys.
 
 @app.route('/')
 def index():
@@ -38,7 +45,11 @@ def initialize_db():
 @app.route('/request', methods=['POST'])
 @cross_origin()
 def accept_request():
-	Request(email=request.form['email'], src_url=request.form['src_url'], link_url=request.form['link_url'], page_url=request.form['page_url'], email_src_concat=request.form['email']+request.form['src_url']).save()
+	src_url = request.form['src_url']
+	if 'base64' in src_url:
+		response = cloudinary.uploader.upload(src_url)
+		src_url = response['secure_url']
+	Request(email=request.form['email'], src_url=src_url, link_url=request.form['link_url'], page_url=request.form['page_url'], email_src_concat=request.form['email']+src_url).save()
 	return '', 204 # everything is ok
 
 @app.route('/request/<email>')
@@ -67,4 +78,5 @@ def complete_request():
 	return redirect(url_for('admin_requests_view'))
 
 if __name__ == '__main__':
+	initialize_env()
 	app.run(debug=True, use_reloader=True)

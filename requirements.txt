@@ -5,3 +5,4 @@ clarifai
 lxml
 requests
 pymodm
+cloudinary
