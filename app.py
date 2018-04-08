@@ -9,6 +9,10 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
+from datetime import datetime
+
+import pymongo
+
 app = Flask(__name__)
 
 def initialize_env():
@@ -49,7 +53,13 @@ def accept_request():
 	if 'base64' in src_url:
 		response = cloudinary.uploader.upload(src_url)
 		src_url = response['secure_url']
-	Request(email=request.form['email'], src_url=src_url, link_url=request.form['link_url'], page_url=request.form['page_url'], email_src_concat=request.form['email']+src_url).save()
+	Request(email=request.form['email'],
+		src_url=src_url,
+		link_url=request.form['link_url'],
+		page_url=request.form['page_url'],
+		email_src_concat=request.form['email']+src_url,
+		time_received=datetime.now()
+		).save()
 	return '', 204 # everything is ok
 
 @app.route('/request/<email>')
@@ -58,19 +68,28 @@ def get_pending_requests(email):
 	print("received request for " + email)
 	request_response = {'requests': []};
 	for request in Request.objects.raw({'email': email}):
-		request_response['requests'].append({'src_url': request.src_url, 'page_url': request.page_url, 'link_url': request.link_url})
+		request_response['requests'].append({'src_url': request.src_url, 'page_url': request.page_url, 'link_url': request.link_url, 'priority_list':request.priority_list})
 	return jsonify(request_response)
+
+@app.route('/priorities', methods=['POST'])
+@cross_origin()
+def accept_priorities():
+	print(request.form)
+	priority_list = request.form.getlist('priority_list[]')
+	print(priority_list)
+	_id = request.form.get('_id')
+	Request.objects.raw({'_id': _id}).update({'$set': {'priority_list': priority_list}})
+	print("Request updated")
+	return '', 204
 
 @app.route('/admin')
 def admin_requests_view():
-	webpage_display_requests = []
-	for request in Request.objects.raw({}):
-		webpage_display_requests.append({'email': request.email, 'src_url':request.src_url, 'page_url':request.page_url, 'link_url':request.link_url, 'email_src_concat':request.email_src_concat})
+	webpage_display_requests = list(Request.objects.raw({}).aggregate({'$sort': {'time_received':pymongo.ASCENDING}}))
 	return render_template('admin.html', requests=webpage_display_requests)
 
 @app.route('/admin', methods=['POST'])
 def complete_request():
-	request_ids = request.form.getlist(('request'))
+	request_ids = request.form.getlist('request')
 	print(request_ids)
 	for user_request in Request.objects.raw({'_id': {'$in': request_ids}}):
 		print(user_request)

@@ -6,3 +6,5 @@ lxml
 requests
 pymodm
 cloudinary
+datetime
+pymongo
