@@ -58,7 +58,7 @@ def accept_request():
 		link_url=request.form['link_url'],
 		page_url=request.form['page_url'],
 		email_src_concat=request.form['email']+src_url,
-		time_received=datetime.now()
+		time_received=pst.localize(datetime.now()).strftime("%a %b %d %H:%M:%S %Z %Y")
 		).save()
 	return '', 204 # everything is ok
 
