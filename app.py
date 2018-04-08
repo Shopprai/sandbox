@@ -10,6 +10,7 @@ import cloudinary.uploader
 import cloudinary.api
 
 from datetime import datetime
+from pytz import timezone
 
 import pymongo
 
@@ -49,6 +50,7 @@ def initialize_db():
 @app.route('/request', methods=['POST'])
 @cross_origin()
 def accept_request():
+	pst = timezone('US/Pacific')
 	src_url = request.form['src_url']
 	if 'base64' in src_url:
 		response = cloudinary.uploader.upload(src_url)
