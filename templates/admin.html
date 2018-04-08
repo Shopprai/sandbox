@@ -2,7 +2,7 @@
 {% if requests %}
 <form method="POST">
 {% for request in requests %}
-<input type="checkbox" name="request" value="{{request._id}}">{{request.time_received}} / {{request.email}} -> <a href={{request.src_url}}>Image URL</a>, <a href={{request.page_url}}>Page URL</a>, <a href={{request.link_url}}>Link URL</a>, Priorities: {{request.priority_list}}  <br>
+<input type="checkbox" name="request" value="{{request._id}}">{{request.time_received.strftime("%a %b %d %H:%M:%S %Z %Y")}} / {{request.email}} -> <a href={{request.src_url}}>Image URL</a>, <a href={{request.page_url}}>Page URL</a>, <a href={{request.link_url}}>Link URL</a>, Priorities: {{request.priority_list}}  <br>
 {% endfor %}
 <input type="submit">
 </form>
