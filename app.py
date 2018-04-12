@@ -51,13 +51,14 @@ def initialize_db():
 @cross_origin()
 def accept_request():
 	pst = timezone('US/Pacific')
-	src_url = request.form['src_url']
+	src_url = request.form.get('src_url')
+	link_url = request.form.get('link_url', 'https://shoppr-ai.herokuapp.com/admin')
 	if 'base64' in src_url:
 		response = cloudinary.uploader.upload(src_url)
 		src_url = response['secure_url']
 	Request(email=request.form['email'],
 		src_url=src_url,
-		link_url=request.form['link_url'],
+		link_url=link_url,
 		page_url=request.form['page_url'],
 		email_src_concat=request.form['email']+src_url,
 		time_received=pst.localize(datetime.now())
