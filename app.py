@@ -9,8 +9,7 @@ import cloudinary
 import cloudinary.uploader
 import cloudinary.api
 
-from datetime import datetime
-from pytz import timezone
+from datetime import datetime, timedelta
 
 import pymongo
 
@@ -50,7 +49,6 @@ def initialize_db():
 @app.route('/request', methods=['POST'])
 @cross_origin()
 def accept_request():
-	pst = timezone('US/Pacific')
 	src_url = request.form.get('src_url')
 	link_url = request.form.get('link_url', 'https://shoppr-ai.herokuapp.com/admin')
 	if 'base64' in src_url:
@@ -61,7 +59,8 @@ def accept_request():
 		link_url=link_url,
 		page_url=request.form['page_url'],
 		email_src_concat=request.form['email']+src_url,
-		time_received=pst.localize(datetime.now())
+		time_received=datetime.now(),
+		time_due=datetime.now() + timedelta(days=1)
 		).save()
 	return '', 204 # everything is ok
 
@@ -70,8 +69,20 @@ def accept_request():
 def get_pending_requests(email):
 	print("received request for " + email)
 	request_response = {'requests': []};
+	now = datetime.now()
 	for request in Request.objects.raw({'email': email}):
-		request_response['requests'].append({'src_url': request.src_url, 'page_url': request.page_url, 'link_url': request.link_url, 'priority_list':request.priority_list})
+		time_left_seconds = (request.time_due - now).seconds
+		time_left_hours = time_left_seconds // 3600
+		time_left_minutes = (time_left_seconds - time_left_hours * 3600) // 60
+		request_response['requests'].append({
+			'src_url': request.src_url,
+			'page_url': request.page_url,
+			'link_url': request.link_url,
+			'email': request.email,
+			'priority_list':request.priority_list,
+			'time_left_hours': time_left_hours,
+			'time_left_minutes': time_left_minutes
+			})
 	return jsonify(request_response)
 
 @app.route('/priorities', methods=['POST'])
@@ -87,15 +98,26 @@ def accept_priorities():
 
 @app.route('/admin')
 def admin_requests_view():
-	webpage_display_requests = list(Request.objects.raw({}).aggregate({'$sort': {'time_received':pymongo.ASCENDING}}))
+	webpage_display_requests = []
+	now = datetime.now()
+	for request in Request.objects.raw({}).aggregate({'$sort': {'time_received':pymongo.ASCENDING}}):
+		time_left_seconds = (request['time_due'] - now).seconds
+		time_left_hours = time_left_seconds // 3600
+		time_left_minutes = (time_left_seconds - time_left_hours * 3600) // 60
+		webpage_display_requests.append({
+			'src_url': request['src_url'],
+			'page_url': request['page_url'],
+			'link_url': request['link_url'],
+			'email': request['email'],
+			'priority_list':request['priority_list'],
+			'time_left_hours': time_left_hours,
+			'time_left_minutes': time_left_minutes
+			})
 	return render_template('admin.html', requests=webpage_display_requests)
 
 @app.route('/admin', methods=['POST'])
 def complete_request():
 	request_ids = request.form.getlist('request')
-	print(request_ids)
-	for user_request in Request.objects.raw({'_id': {'$in': request_ids}}):
-		print(user_request)
 	Request.objects.raw({'_id': {'$in': request_ids}}).delete()
 	return redirect(url_for('admin_requests_view'))
 
