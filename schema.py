@@ -23,6 +23,6 @@ class Request(MongoModel):
 	email_src_concat = fields.CharField(primary_key=True) # unique ID is combined email + img src
 	time_received = fields.DateTimeField()
 	time_due = fields.DateTimeField()
-	priority_list = fields.ListField(fields.CharField(), default=['no priorities selected'])
+	priority_list = fields.ListField(fields.CharField(), default=[])
 	class Meta:
 		connection_alias = "main"
