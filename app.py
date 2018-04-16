@@ -60,7 +60,8 @@ def accept_request():
 		page_url=request.form['page_url'],
 		email_src_concat=request.form['email']+src_url,
 		time_received=datetime.now(),
-		time_due=datetime.now() + timedelta(days=1)
+		time_due=datetime.now() + timedelta(days=1),
+		priority_list=[]
 		).save()
 	return '', 204 # everything is ok
 
