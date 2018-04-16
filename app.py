@@ -104,6 +104,7 @@ def admin_requests_view():
 		time_left_seconds = (request['time_due'] - now).seconds
 		time_left_hours = time_left_seconds // 3600
 		time_left_minutes = (time_left_seconds - time_left_hours * 3600) // 60
+		print(request)
 		webpage_display_requests.append({
 			'src_url': request['src_url'],
 			'page_url': request['page_url'],
